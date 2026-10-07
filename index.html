@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Brecha Generacional | Jóvenes vs. Sistemas Educativos</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+  body {
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    min-height: 100vh;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0; height: 5px;
+    background: linear-gradient(90deg, #e94560, #f39c12, #00d2ff);
+    width: 0%; z-index: 1000; transition: width 0.5s ease;
+    box-shadow: 0 0 15px rgba(233,69,96,0.6);
+  }
+  .slide {
+    display: none;
+    min-height: 100vh;
+    padding: 40px 60px;
+    animation: fadeIn 0.8s ease;
+    position: relative;
+  }
+  .slide.active { display: flex; flex-direction: column; justify-content: center; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* PORTADA */
+  .cover { text-align: center; align-items: center; }
+  .cover h1 {
+    font-size: 3.5rem;
+    background: linear-gradient(90deg, #e94560, #f39c12, #00d2ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+    animation: glow 3s ease-in-out infinite;
+  }
+  @keyframes glow {
+    0%, 100% { filter: drop-shadow(0 0 10px rgba(233,69,96,0.5)); }
+    50% { filter: drop-shadow(0 0 25px rgba(0,210,255,0.8)); }
+  }
+  .cover .subtitle { font-size: 1.2rem; color: #b8c6db; margin-bottom: 30px; line-height: 1.6; }
+  .stats-preview {
+    display: flex; justify-content: center; gap: 30px;
+    margin: 40px 0; flex-wrap: wrap;
+  }
+  .stat-box {
+    background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(233,69,96,0.3);
+    padding: 20px 30px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+  }
+  .stat-box:hover {
+    transform: translateY(-10px);
+    border-color: #e94560;
+    box-shadow: 0 15px 40px rgba(233,69,96,0.4);
+  }
+  .stat-box .number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, #e94560, #f39c12);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-box .label { font-size: 0.9rem; color: #b8c6db; margin-top: 5px; }
+  .stat-detail {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.5s;
+    font-size: 0.85rem;
+    color: #e0e6ed;
+    margin-top: 0;
+  }
+  .stat-box.expanded .stat-detail { max-height: 100px; margin-top: 10px; }
+
+  /* SECCIONES */
+  .slide-title {
+    font-size: 2.3rem;
+    margin-bottom: 25px;
+    display: flex; align-items: center; gap: 15px;
+    border-bottom: 2px solid rgba(233,69,96,0.3);
+    padding-bottom: 15px;
+  }
+  .slide-title .icon { font-size: 2.8rem; }
+  
+  /* DATOS INTERACTIVOS */
+  .data-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+  }
+  .data-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .data-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(233,69,96,0.2), transparent);
+    transition: left 0.5s;
+  }
+  .data-card:hover::before { left: 100%; }
+  .data-card:hover {
+    background: rgba(233,69,96,0.1);
+    border-color: #e94560;
+    transform: translateY(-5px);
+  }
+  .data-card .percentage {
+    font-size: 3rem;
+    font-weight: bold;
+    background: linear-gradient(90deg, #e94560, #f39c12);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+  .data-card h4 { color: #00d2ff; margin-bottom: 10px; font-size: 1.1rem; }
+  .data-card p { color: #b8c6db; font-size: 0.9rem; line-height: 1.5; }
+  .data-detail {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.5s;
+    margin-top: 0;
+    padding: 0;
+    background: rgba(0,0,0,0.3);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #e0e6ed;
+    line-height: 1.6;
+  }
+  .data-card.expanded .data-detail {
+    max-height: 200px;
+    margin-top: 15px;
+    padding: 15px;
+  }
+
+  /* BRECHAS */
+  .gap-container {
+    display: flex;
+    gap: 30px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .gap-side {
+    flex: 1;
+    min-width: 300px;
+    background: rgba(255,255,255,0.05);
+    padding: 30px;
+    border-radius: 20px;
+    border: 2px solid;
+    transition: all 0.3s;
+  }
+  .gap-aspirations {
+    border-color: #00d2ff;
+    background: linear-gradient(135deg, rgba(0,210,255,0.1), rgba(0,210,255,0.05));
+  }
+  .gap-reality {
+    border-color: #e94560;
+    background: linear-gradient(135deg, rgba(233,69,96,0.1), rgba(233,69,96,0.05));
+  }
+  .gap-side:hover {
+    transform: scale(1.02);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+  .gap-side h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .gap-aspirations h3 { color: #00d2ff; }
+  .gap-reality h3 { color: #e94560; }
+  .gap-item {
+    background: rgba(0,0,0,0.3);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .gap-item:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateX(5px);
+  }
+  .gap-item strong { display: block; margin-bottom: 5px; }
+  .gap-item .detail {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s;
+    font-size: 0.85rem;
+    color: #b8c6db;
+  }
+  .gap-item.expanded .detail { max-height: 100px; margin-top: 8px; }
+
+  /* PROPUESTA */
+  .proposal-banner {
+    background: linear-gradient(135deg, rgba(233,69,96,0.2), rgba(0,210,255,0.2));
+    border: 2px solid rgba(233,69,96,0.4);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  .proposal-banner h2 {
+    font-size: 2.5rem;
+    background: linear-gradient(90deg, #e94560, #00d2ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+  }
+  .module-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+  .module {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 25px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .module:hover {
+    background: rgba(233,69,96,0.15);
+    border-color: #e94560;
+    transform: translateY(-5px);
+  }
+  .module .mod-icon { font-size: 2.5rem; margin-bottom: 10px; }
+  .module h4 { color: #00d2ff; margin-bottom: 10px; }
+  .module-desc {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.5s;
+    color: #b8c6db; font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  .module.expanded .module-desc { max-height: 250px; margin-top: 10px; }
+
+  /* CONSTRUCTIVISMO */
+  .constructivist-box {
+    background: linear-gradient(135deg, rgba(243,156,18,0.1), rgba(233,69,96,0.1));
+    border: 2px solid rgba(243,156,18,0.4);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 30px 0;
+  }
+  .constructivist-box h3 {
+    color: #f39c12;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .principle-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+  }
+  .principle {
+    background: rgba(0,0,0,0.3);
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #f39c12;
+    transition: all 0.3s;
+  }
+  .principle:hover {
+    background: rgba(243,156,18,0.15);
+    transform: translateX(5px);
+  }
+  .principle strong { color: #f39c12; display: block; margin-bottom: 8px; }
+
+  /* PROMPTS */
+  .prompt-box {
+    background: rgba(0,0,0,0.4);
+    border-left: 4px solid #00d2ff;
+    padding: 20px;
+    border-radius: 10px;
+    margin: 20px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    position: relative;
+  }
+  .prompt-box::before {
+    content: "💬 PROMPT #" attr(data-num);
+    position: absolute; top: -12px; left: 15px;
+    background: #00d2ff; color: #0f0c29;
+    padding: 3px 12px; border-radius: 10px;
+    font-size: 0.75rem; font-weight: bold;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  .prompt-box .role { color: #e94560; font-weight: bold; }
+  .prompt-box .task { color: #f39c12; }
+
+  /* REFERENCIAS */
+  .ref-list { list-style: none; }
+  .ref-list li {
+    background: rgba(255,255,255,0.05);
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    border-left: 3px solid #e94560;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    transition: all 0.3s;
+  }
+  .ref-list li:hover {
+    background: rgba(233,69,96,0.15);
+    transform: translateX(10px);
+  }
+
+  /* NAVEGACIÓN */
+  .nav-controls {
+    position: fixed; bottom: 30px; right: 30px;
+    display: flex; gap: 10px; z-index: 999;
+  }
+  .nav-btn {
+    background: rgba(233,69,96,0.2);
+    border: 1px solid #e94560;
+    color: white;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+  .nav-btn:hover {
+    background: #e94560;
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(233,69,96,0.6);
+  }
+  .slide-counter {
+    position: fixed; bottom: 35px; left: 30px;
+    background: rgba(0,0,0,0.5);
+    padding: 10px 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+    z-index: 999;
+  }
+  .slide-counter .current { color: #e94560; font-weight: bold; font-size: 1.2rem; }
+
+  /* CONCLUSIONES */
+  .conclusion-item {
+    background: rgba(255,255,255,0.05);
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    border-left: 4px solid #00d2ff;
+    transition: all 0.3s;
+  }
+  .conclusion-item:hover {
+    background: rgba(0,210,255,0.1);
+    transform: translateX(10px);
+  }
+  .conclusion-item strong { color: #f39c12; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 30px 20px; }
+    .cover h1 { font-size: 2rem; }
+    .slide-title { font-size: 1.5rem; }
+    .gap-container { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- SLIDE 1: PORTADA -->
+<div class="slide active cover" data-slide="1">
+  <h1>La Brecha Generacional</h1>
+  <p class="subtitle">UTEL - Filosofía de la Educación | Oscar Fabián Gómez Sánchez</p>
+  <p class="subtitle">¿Los jóvenes se sienten preparados para enfrentar su futuro?<br>Análisis crítico de la Encuesta Mundial WISE/Ipsos (2020)</p>
+    
+  <div class="stats-preview">
+    <div class="stat-box" onclick="this.classList.toggle('expanded')">
+      <div class="number">9,509</div>
+      <div class="label">Jóvenes encuestados</div>
+      <div class="stat-detail">De 16 a 25 años en 20 países</div>
+    </div>
+    <div class="stat-box" onclick="this.classList.toggle('expanded')">
+      <div class="number">90%</div>
+      <div class="label">Valoran la educación</div>
+      <div class="stat-detail">Más allá de lo profesional</div>
+    </div>
+    <div class="stat-box" onclick="this.classList.toggle('expanded')">
+      <div class="number">48%</div>
+      <div class="label">Se sienten preparados</div>
+      <div class="stat-detail">Para comprender problemas sociales</div>
+    </div>
+  </div>
+  
+  <p style="margin-top:40px; color:#b8c6db; font-size:0.9rem;">
+    Usa las <strong>flechas del teclado ← →</strong> o los botones para navegar
+  </p>
+</div>
+
+<!-- SLIDE 2: CONTEXTO -->
+<div class="slide" data-slide="2">
+  <h2 class="slide-title"><span class="icon">📊</span> El Panorama Global</h2>
+  <p style="font-size:1.1rem; color:#b8c6db; margin-bottom:20px;">
+    La Cumbre Mundial para la Innovación en Educación (WISE) publicó un estudio revelador sobre las opiniones de los jóvenes. Haz clic en cada dato para explorar los detalles.
+  </p>
+  
+  <div class="data-grid">
+    <div class="data-card" onclick="this.classList.toggle('expanded')">
+      <div class="percentage">84%</div>
+      <h4>Aprendizaje fuera del aula</h4>
+      <p>Consideran que aprender fuera del centro educativo es tan importante como en clase</p>
+      <div class="data-detail">
+        <strong>💡 Implicación:</strong> Los jóvenes reconocen que el aprendizaje es ubicuo y continuo. Los sistemas educativos deben integrar experiencias extracurriculares, aprendizaje basado en proyectos comunitarios y conexiones con el mundo real.
+      </div>
+    </div>
+    
+    <div class="data-card" onclick="this.classList.toggle('expanded')">
+      <div class="percentage">80%</div>
+      <h4>Satisfacción con la educación</h4>
+      <p>Afirman estar satisfechos o algo satisfechos con su educación actual</p>
+      <div class="data-detail">
+        <strong>⚠️ Pero...</strong> Solo el <strong>27%</strong> dice estar <em>totalmente</em> satisfecho. Hay una brecha significativa entre "estar bien" y "estar excelente".
+      </div>
+    </div>
+    
+    <div class="data-card" onclick="this.classList.toggle('expanded')">
+      <div class="percentage">60%</div>
+      <h4>Demanda de personalización</h4>
+      <p>Quieren que sus maestros les den consejos personales sobre orientación profesional</p>
+      <div class="data-detail">
+        <strong>🎯 Necesidad:</strong> Adaptación a necesidades individuales. Los jóvenes no quieren ser tratados como un bloque homogéneo. Exigen rutas de aprendizaje personalizadas.
+      </div>
+    </div>
+    
+    <div class="data-card" onclick="this.classList.toggle('expanded')">
+      <div class="percentage">50%</div>
+      <h4>Poco espacio para tecnologías</h4>
+      <p>Afirman que en su educación hay poco espacio para nuevas tecnologías (IA, codificación)</p>
+      <div class="data-detail">
+        <strong>🚨 Brecha crítica:</strong> Los jóvenes perciben que sus sistemas educativos no los preparan para el mundo digital. Esto genera ansiedad sobre su futuro laboral.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: BRECHAS -->
+<div class="slide" data-slide="3">
+  <h2 class="slide-title"><span class="icon">⚡</span> La Brecha: Aspiraciones vs. Realidad</h2>
+  <p style="color:#b8c6db; margin-bottom:20px;">Los jóvenes tienen aspiraciones claras, pero los sistemas educativos no están en la misma sintonía. Haz clic en cada elemento para explorar.</p>
+  
+  <div class="gap-container">
+    <div class="gap-side gap-aspirations">
+      <h3>🌟 Lo que los jóvenes QUIEREN</h3>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>44% más creatividad y curiosidad</strong>
+        <div class="detail">Quieren espacios para explorar, cuestionar y crear. No solo memorizar contenidos.</div>
+      </div>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>41% más habilidades de comunicación</strong>
+        <div class="detail">Demandan práctica en oratoria, debate, trabajo colaborativo y expresión de ideas.</div>
+      </div>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>87% responsabilidad con el planeta</strong>
+        <div class="detail">Creen que su generación debe mejorar el mundo, pero solo el 43% recibe conocimiento para actuar.</div>
+      </div>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>89% prepararse para el futuro</strong>
+        <div class="detail">Quieren herramientas prácticas para enfrentar desafíos reales, no solo teoría abstracta.</div>
+      </div>
+    </div>
+    
+    <div class="gap-side gap-reality">
+      <h3>⚠️ Lo que los sistemas OFRECEN</h3>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>Solo 48% se siente preparado</strong>
+        <div class="detail">Para comprender los grandes problemas sociales. Más de la mitad se siente perdido.</div>
+      </div>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>Solo 43% recibe conocimiento para actuar</strong>
+        <div class="detail">Quieren encontrar soluciones, pero no les enseñan cómo. Hay una desconexión entre conciencia y acción.</div>
+      </div>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>Modelo educativo del siglo XIX-XX</strong>
+        <div class="detail">El sistema escolar actual nació para sociedades industriales. No responde a la sociedad de la información del siglo XXI.</div>
+      </div>
+      
+      <div class="gap-item" onclick="this.classList.toggle('expanded')">
+        <strong>Poca integración de TIC</strong>
+        <div class="detail">Los jóvenes viven en un mundo digital, pero sus aulas siguen siendo analógicas en muchos casos.</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:rgba(243,156,18,0.1); padding:20px; border-radius:15px; border-left:4px solid #f39c12; margin-top:20px;">
+    <strong style="color:#f39c12;">🔍 Análisis Crítico:</strong> La brecha no es solo de contenido, sino de <strong>mentalidad</strong>. Los jóvenes son conscientes de los desafíos globales (85% teme por el estado del planeta), pero los sistemas educativos no les proporcionan las herramientas ni la mentalidad para abordarlos. Esto genera ansiedad y sensación de impotencia.
+  </div>
+</div>
+
+<!-- SLIDE 4: PREOCUPACIONES -->
+<div class="slide" data-slide="4">
+  <h2 class="slide-title"><span class="icon">🌍</span> Las Preocupaciones de una Generación</h2>
+  <p style="color:#b8c6db; margin-bottom:20px;">Los jóvenes están principalmente preocupados por estos temas globales. Sin embargo, solo una minoría está activamente involucrada.</p>
+  
+  <div class="data-grid">
+    <div class="data-card" onclick="this.classList.toggle('expanded')">
+      <div class="percentage">20%</div>
+      <h4>Acceso al empleo</h4>
+      <p>Preocupación por encontrar trabajo en un mercado competitivo y cambiante</p>
+      <div class="data-detail">
+        <strong>📉 Participación activa:</strong> Solo el 20% está involucrado. Hay una desconexión entre preocupación y acción. Los jóvenes sienten que no tienen control sobre su futuro laboral.
+      </div>
+    </div>
+    
+    <div class="data-card" onclick="this.classList.toggle('expanded')">
+      <div class="percentage">19%</div>
+      <h4>Cambio climático</h4>
+      <p>Medio ambiente y sostenibilidad como prioridad existencial</p>
+      <div class="data-detail">
+        <strong>🌱 Participación activa:</strong> Solo el 19%. A pesar de ser la generación más consciente del clima, sienten que sus acciones individuales no son suficientes sin cambios sistémicos.
+      </div>
+    </div>
+    
+    <div class="data-card" onclick="this.classList.toggle('expanded')">
+      <div class="percentage">17%</div>
+      <h4>Pobreza y desigualdad</h4>
+      <p>Justicia social y equidad como valores fundamentales</p>
+      <div class="data-detail">
+        <strong>⚖️ Participación activa:</strong> Solo el 17%. Quieren un mundo más justo, pero no saben cómo contribuir efectivamente. Falta educación en acción social y emprendimiento con impacto.
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:rgba(233,69,96,0.1); padding:20px; border-radius:15px; border-left:4px solid #e94560; margin-top:20px;">
+    <strong style="color:#e94560;">💔 La paradoja:</strong> El 85% expresa temor sobre el estado del planeta, pero solo el 17-20% está activamente involucrado. ¿Por qué? Porque <strong>no se sienten capacitados</strong> para actuar. Falta empoderamiento, herramientas y confianza.
+  </div>
+</div>
+
+<!-- SLIDE 5: CONSTRUCTIVISMO -->
+<div class="slide" data-slide="5">
+  <h2 class="slide-title"><span class="icon">🧠</span> El Constructivismo como Respuesta</h2>
+  
+  <div class="constructivist-box">
+    <h3>🏗️ Principios Constructivistas Aplicados</h3>
+    <p style="color:#b8c6db; margin-bottom:20px;">El constructivismo ofrece un marco pedagógico que responde directamente a las necesidades identificadas en la encuesta. Haz clic en cada principio para ver cómo se aplica.</p>
+    
+    <div class="principle-list">
+      <div class="principle" onclick="this.classList.toggle('expanded')">
+        <strong>Aprender a aprender</strong>
+        <div class="detail">
+          Los jóvenes deben desarrollar metacognición: saber cómo aprenden, qué estrategias les funcionan, cómo autorregular su aprendizaje. Esto responde a la demanda del 60% de orientación personalizada.
+        </div>
+      </div>
+      
+      <div class="principle" onclick="this.classList.toggle('expanded')">
+        <strong>Aprender a ser</strong>
+        <div class="detail">
+          Desarrollo de identidad, valores y propósito. Responde al 87% que quiere mejorar el planeta: necesitan saber quiénes son y qué pueden aportar al mundo.
+        </div>
+      </div>
+      
+      <div class="principle" onclick="this.classList.toggle('expanded')">
+        <strong>Enfrentarse a la información</strong>
+        <div class="detail">
+          Alfabetización informacional y pensamiento crítico. En la era de la desinformación, deben saber evaluar fuentes, detectar sesgos y construir conocimiento válido.
+        </div>
+      </div>
+      
+      <div class="principle" onclick="this.classList.toggle('expanded')">
+        <strong>Cualificación en TIC</strong>
+        <div class="detail">
+          Responde directamente al 50% que pide más tecnologías. No solo usar herramientas, sino comprender su impacto económico, ideológico, político y cultural.
+        </div>
+      </div>
+      
+      <div class="principle" onclick="this.classList.toggle('expanded')">
+        <strong>Conciencia tecnológica</strong>
+        <div class="detail">
+          Entender las implicaciones de la tecnología en la sociedad. Los jóvenes deben ser ciudadanos digitales críticos, no solo consumidores pasivos.
+        </div>
+      </div>
+      
+      <div class="principle" onclick="this.classList.toggle('expanded')">
+        <strong>Aprendizaje situado</strong>
+        <div class="detail">
+          El aprendizaje debe ocurrir en contextos reales y significativos. Responde al 84% que valora el aprendizaje fuera del aula. Proyectos comunitarios, aprendizaje-servicio, conexiones con el mundo real.
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:rgba(0,210,255,0.1); padding:20px; border-radius:15px; border-left:4px solid #00d2ff; margin-top:20px;">
+    <strong style="color:#00d2ff;">🎯 Clave constructivista:</strong> El estudiante no es un receptor pasivo de información, sino un <strong>constructor activo de conocimiento</strong>. Esto empodera a los jóvenes para tomar control de su aprendizaje y sentirse capacitados para enfrentar desafíos reales.
+  </div>
+</div>
+
+<!-- SLIDE 6: PROPUESTA INNOVADORA -->
+<div class="slide" data-slide="6">
+  <h2 class="slide-title"><span class="icon">🚀</span> Propuesta Innovadora</h2>
+  
+  <div class="proposal-banner">
+    <h2>🌐 Future-Ready Labs</h2>
+    <p style="color:#b8c6db;">Ecosistema de Aprendizaje Constructivista para el Siglo XXI</p>
+  </div>
+  
+  <p style="margin-bottom:20px; color:#b8c6db;">Haz clic en cada módulo para explorar cómo responde a las necesidades identificadas:</p>
+  
+  <div class="module-grid">
+    <div class="module" onclick="this.classList.toggle('expanded')">
+      <div class="mod-icon">🤖</div>
+      <h4>IA Mentor Personalizado</h4>
+      <p>Asistente de IA que adapta rutas de aprendizaje según intereses, ritmo y estilo de cada estudiante.</p>
+      <div class="module-desc">
+        <p><strong>🎯 Responde a:</strong> Demanda del 60% de orientación personalizada.</p>
+        <p><strong>💡 Funcionamiento:</strong> La IA analiza el progreso, identifica fortalezas/debilidades y sugiere recursos, proyectos y mentores humanos. No reemplaza al docente, lo potencia.</p>
+        <p><strong>🔧 Habilidades digitales:</strong> Interacción con IA, gestión de datos personales de aprendizaje, alfabetización algorítmica.</p>
+      </div>
+    </div>
+    
+    <div class="module" onclick="this.classList.toggle('expanded')">
+      <div class="mod-icon">🌍</div>
+      <h4>Proyectos de Impacto Real</h4>
+      <p>Aprendizaje basado en resolver problemas reales de la comunidad usando metodologías ágiles.</p>
+      <div class="module-desc">
+        <p><strong>🎯 Responde a:</strong> 87% quiere mejorar el planeta, pero solo 17-20% actúa. 84% valora aprendizaje fuera del aula.</p>
+        <p><strong>💡 Funcionamiento:</strong> Los estudiantes identifican problemas locales (pobreza, clima, empleo), diseñan soluciones, las implementan y miden impacto. Conectan con ONGs, empresas y gobiernos.</p>
+        <p><strong>🔧 Habilidades digitales:</strong> Gestión de proyectos con herramientas colaborativas, análisis de datos, comunicación digital profesional.</p>
+      </div>
+    </div>
+    
+    <div class="module" onclick="this.classList.toggle('expanded')">
+      <div class="mod-icon">🎮</div>
+      <h4>Simuladores de Desafíos Globales</h4>
+      <p>Entornos virtuales donde los estudiantes enfrentan problemas complejos (cambio climático, desigualdad) y experimentan con soluciones.</p>
+      <div class="module-desc">
+        <p><strong>🎯 Responde a:</strong> Solo 48% se siente preparado para comprender problemas sociales. 85% teme por el planeta.</p>
+        <p><strong>💡 Funcionamiento:</strong> Simulaciones tipo "juego serio" donde toman decisiones, ven consecuencias y aprenden de errores sin riesgo real. Desarrollan pensamiento sistémico.</p>
+        <p><strong>🔧 Habilidades digitales:</strong> Navegación en entornos virtuales, modelado de sistemas complejos, toma de decisiones basada en datos.</p>
+      </div>
+    </div>
+    
+    <div class="module" onclick="this.classList.toggle('expanded')">
+      <div class="mod-icon">🎨</div>
+      <h4>Laboratorios de Creatividad y Comunicación</h4>
+      <p>Espacios físicos y virtuales para desarrollar creatividad, oratoria, debate y expresión multimodal.</p>
+      <div class="module-desc">
+        <p><strong>🎯 Responde a:</strong> 44% pide más creatividad, 41% más comunicación.</p>
+        <p><strong>💡 Funcionamiento:</strong> Talleres de diseño thinking, producción de contenido (podcasts, videos, blogs), debates estructurados, presentaciones tipo TED. Los estudiantes crean, no solo consumen.</p>
+        <p><strong>🔧 Habilidades digitales:</strong> Producción de contenido multimedia, storytelling digital, comunicación asíncrona y síncrona efectiva.</p>
+      </div>
+    </div>
+    
+    <div class="module" onclick="this.classList.toggle('expanded')">
+      <div class="mod-icon">📊</div>
+      <h4>Portfolio de Competencias del Siglo XXI</h4>
+      <p>Sistema de badges digitales que certifica habilidades blandas, técnicas y de ciudadanía global.</p>
+      <div class="module-desc">
+        <p><strong>🎯 Responde a:</strong> 89% quiere prepararse para el futuro. Necesitan evidencia de sus competencias más allá de calificaciones tradicionales.</p>
+        <p><strong>💡 Funcionamiento:</strong> Cada proyecto, simulación y actividad genera badges verificables (blockchain). Los estudiantes construyen un portfolio visible para universidades y empleadores.</p>
+        <p><strong>🔧 Habilidades digitales:</strong> Gestión de identidad digital, comprensión de tecnologías emergentes (blockchain), autopromoción profesional ética.</p>
+      </div>
+    </div>
+    
+    <div class="module" onclick="this.classList.toggle('expanded')">
+      <div class="mod-icon">🤝</div>
+      <h4>Red de Mentores Globales</h4>
+      <p>Conexión con profesionales, activistas y expertos mundiales que guían a los estudiantes en sus proyectos.</p>
+      <div class="module-desc">
+        <p><strong>🎯 Responde a:</strong> 60% quiere orientación personalizada. 87% quiere mejorar el planeta.</p>
+        <p><strong>💡 Funcionamiento:</strong> Plataforma de mentoría donde estudiantes conectan con profesionales de su área de interés. Sesiones virtuales, feedback en proyectos, networking internacional.</p>
+        <p><strong>🔧 Habilidades digitales:</strong> Networking profesional digital, comunicación intercultural, gestión de relaciones virtuales.</p>
+      </div>
+    </div>
+  </div>
+  
+  <div style="background:rgba(146,254,157,0.1); padding:20px; border-radius:15px; border-left:4px solid #92fe9d; margin-top:25px;">
+    <strong style="color:#92fe9d;">🌟 ¿Por qué es innovadora?</strong>
+    <p style="margin-top:10px;">Responde <strong>directamente</strong> a cada brecha identificada en la encuesta. Integra constructivismo (aprendizaje activo, situado, significativo), tecnologías del siglo XXI (IA, simuladores, blockchain), y desarrollo de habilidades blandas (creatividad, comunicación, ciudadanía global). Transforma al estudiante de receptor pasivo a <strong>constructor activo de su futuro</strong>.</p>
+  </div>
+</div>
+
+<!-- SLIDE 7: METACOGNICIÓN / PROMPTS -->
+<div class="slide" data-slide="7">
+  <h2 class="slide-title"><span class="icon">🧠</span> Metacognición: Construcción de Prompts</h2>
+  <p style="color:#b8c6db; margin-bottom:20px;">Así co-creé esta presentación y propuesta con IA (criterio de rúbrica: Construcción de Prompts)</p>
+  
+  <div class="prompt-box" data-num="1">
+    <span class="role">[ROL]</span> Experto en pedagogía constructivista y análisis de políticas educativas globales.<br><br>
+    <span class="task">[TAREA]</span> A partir de la encuesta WISE/Ipsos sobre jóvenes y educación, realiza un análisis crítico identificando las brechas entre las aspiraciones de los jóvenes y lo que ofrecen los sistemas educativos. Identifica patrones ocultos en los datos, especialmente la paradoja entre alta conciencia de problemas globales (85% teme por el planeta) y baja participación activa (17-20%).<br><br>
+    <span style="color:#92fe9d;">[FORMATO]</span> Extrae 5 implicaciones pedagógicas concretas basadas en principios constructivistas que respondan a estas brechas.
+  </div>
+  
+  <div class="prompt-box" data-num="2">
+    <span class="role">[ROL]</span> Diseñador Instruccional especializado en EdTech y aprendizaje experiencial.<br><br>
+    <span class="task">[TAREA]</span> Basándote en las necesidades identificadas (personalización, tecnologías del siglo XXI, creatividad, comunicación, acción social), diseña una propuesta de ecosistema educativo innovador que integre IA, simuladores, proyectos reales y mentoría global. La propuesta debe ser constructivista, desarrollar habilidades digitales y empoderar a los jóvenes para actuar sobre problemas reales.<br><br>
+    <span style="color:#92fe9d;">[FORMATO]</span> Detalla 6 módulos, explicando cómo cada uno responde a una necesidad específica de la encuesta y qué habilidades digitales desarrolla.
+  </div>
+  
+  <div class="prompt-box" data-num="3">
+    <span class="role">[ROL]</span> Diseñador UX/UI educativo especializado en visualización de datos y presentaciones interactivas.<br><br>
+    <span class="task">[TAREA]</span> Transforma el análisis de datos de la encuesta WISE en una experiencia de aprendizaje no lineal con elementos interactivos (tarjetas expandibles, comparaciones visuales, efectos hover) que permitan al espectador descubrir activamente las brechas y soluciones.<br><br>
+    <span style="color:#92fe9d;">[FORMATO]</span> Código HTML autocontenido con diseño moderno, gradientes, animaciones y estructura lógica: problema → análisis → solución.
+  </div>
+</div>
+
+<!-- SLIDE 8: CONCLUSIONES -->
+<div class="slide" data-slide="8">
+  <h2 class="slide-title"><span class="icon">🎯</span> Conclusiones Pedagógicas</h2>
+  
+  <div class="conclusion-item">
+    <strong>1. Los jóvenes no están desmotivados, están desconexionados:</strong> Valoran la educación (90%), pero sienten que no los prepara para los desafíos reales. El problema no es su actitud, es la relevancia del contenido.
+  </div>
+  
+  <div class="conclusion-item">
+    <strong>2. La brecha es de empoderamiento, no de información:</strong> El 85% teme por el planeta, pero solo el 17-20% actúa. No falta conciencia, faltan herramientas, confianza y oportunidades para actuar. Los sistemas educativos deben pasar de informar a empoderar.
+  </div>
+  
+  <div class="conclusion-item">
+    <strong>3. El constructivismo es la respuesta pedagógica:</strong> Aprender a aprender, aprender a ser, enfrentar la información, cualificarse en TIC y desarrollar conciencia tecnológica son los 5 pilares que responden directamente a las demandas de los jóvenes.
+  </div>
+  
+  <div class="conclusion-item">
+    <strong>4. La personalización no es un lujo, es una necesidad:</strong> El 60% demanda orientación personalizada. Los sistemas educativos masificados del siglo XIX-XX no pueden responder a las necesidades individuales del siglo XXI. La IA puede ayudar a escalar la personalización.
+  </div>
+  
+  <div class="conclusion-item">
+    <strong>5. El aprendizaje debe ser situado y con propósito:</strong> El 84% valora el aprendizaje fuera del aula. Los proyectos de impacto real, las conexiones con la comunidad y la resolución de problemas auténticos son esenciales para mantener el engagement.
+  </div>
+  
+  <div class="conclusion-item">
+    <strong>6. Las habilidades del siglo XXI no son opcionales:</strong> Creatividad (44%), comunicación (41%) y tecnologías (50%) son demandas explícitas. Los sistemas educativos que ignoren estas habilidades estarán preparando a los jóvenes para un mundo que ya no existe.
+  </div>
+  
+  <div class="conclusion-item">
+    <strong>7. La tecnología es catalizador, no sustituto:</strong> La propuesta Future-Ready Labs integra IA, simuladores y plataformas digitales, pero el corazón sigue siendo el aprendizaje activo, la construcción de conocimiento y la acción real. La tecnología potencia, no reemplaza, la pedagogía constructivista.
+  </div>
+</div>
+
+<!-- SLIDE 9: REFERENCIAS -->
+<div class="slide" data-slide="9">
+  <h2 class="slide-title"><span class="icon">📚</span> Referencias (APA 7ª Edición)</h2>
+  
+  <ul class="ref-list">
+    <li>Encuesta Mundial. (2020). ¿Los jóvenes sí se sienten preparados para enfrentar su futuro? <em>Semana</em>. https://www.semana.com/educacion/articulo/los-jovenes-si-se-sienten-preparados-para-enfrentar-su-futuro-encuesta-mundial/649349</li>
+    
+    <li>WISE (World Innovation Summit for Education). (2020). <em>Learning for people, planet, prosperity and peace</em>. WISE Conference. https://www.wise-qatar.org/</li>
+    
+    <li>Ipsos. (2020). <em>Global Youth Survey 2020: Education and Future Perspectives</em>. Ipsos Research. https://www.ipsos.com/</li>
+    
+    <li>Coll, C., & Martín, E. (2006). Vigotsky y el constructivismo: Una revisión crítica. <em>Revista de Educación</em>, 340, 37-58.</li>
+    
+    <li>Jonassen, D. H. (1999). <em>Designing constructivist learning environments</em>. In C. M. Reigeluth (Ed.), Instructional-design theories and models (Vol. 2, pp. 215-239). Lawrence Erlbaum Associates.</li>
+    
+    <li>UNESCO. (2021). <em>Reimagining our futures together: A new social contract for education</em>. UNESCO Publishing. https://www.unesco.org/</li>
+    
+    <li>World Economic Forum. (2020). <em>Schools of the future: Defining new models of education for the Fourth Industrial Revolution</em>. WEF. https://www.weforum.org/</li>
+  </ul>
+  
+  <div style="text-align:center; margin-top:40px; padding:30px; background:linear-gradient(135deg, rgba(233,69,96,0.1), rgba(0,210,255,0.1)); border-radius:20px;">
+    <h3 style="color:#e94560; margin-bottom:15px;">✨ ¡Gracias por tu atención!</h3>
+    <p style="color:#b8c6db;">Presentación interactiva desarrollada como análisis crítico del caso WISE/Ipsos.</p>
+    <p style="margin-top:15px; font-size:0.9rem;">📅 Octubre 2026</p>
+  </div>
+</div>
+
+<!-- CONTROLES -->
+<div class="slide-counter">
+  <span class="current" id="currentSlide">1</span> / <span id="totalSlides">9</span>
+</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" onclick="prevSlide()">←</button>
+  <button class="nav-btn" onclick="nextSlide()">→</button>
+</div>
+
+<script>
+  let currentSlide = 1;
+  const totalSlides = 9;
+  
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    document.querySelector(`[data-slide="${n}"]`).classList.add('active');
+    currentSlide = n;
+    document.getElementById('currentSlide').textContent = n;
+    document.getElementById('progressBar').style.width = (n/totalSlides*100) + '%';
+    window.scrollTo(0, 0);
+  }
+  
+  function nextSlide() {
+    if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+  }
+  
+  function prevSlide() {
+    if (currentSlide > 1) showSlide(currentSlide - 1);
+  }
+  
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+  });
+</script>
+
+</body>
+</html>
